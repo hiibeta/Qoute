@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import TimeDisplay from './components/TimeDisplay';
 import WeatherDisplay from './components/WeatherDisplay';
@@ -62,19 +61,20 @@ const App: React.FC = () => {
       className="h-screen w-screen bg-cover bg-center transition-all duration-1000 ease-in-out"
       style={{ backgroundImage: `url(${imageUrl})` }}
     >
-      <div className="h-full w-full bg-black/50 flex flex-col justify-between items-center p-6 md:p-12 text-white">
-        <header className="w-full flex justify-end">
-          <WeatherDisplay />
+      <div className="relative h-full w-full bg-black/50 p-6 md:p-12 text-white">
+        <header className="absolute top-6 left-6 md:top-12 md:left-12">
+          <TimeDisplay />
         </header>
 
-        <section className="flex-grow flex items-center justify-center">
-          <TimeDisplay />
+        <aside className="absolute top-6 right-6 md:top-12 md:right-12">
+          <WeatherDisplay />
+        </aside>
+
+        <section className="h-full flex items-center justify-center">
+           <QuoteDisplay quote={quote} loading={loading} isVisible={isContentVisible} />
         </section>
 
-        <footer className="w-full flex justify-center items-center h-48">
-          {error && <p className="text-red-400">{error}</p>}
-          <QuoteDisplay quote={quote} loading={loading} isVisible={isContentVisible} />
-        </footer>
+        {error && <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-red-400">{error}</p>}
       </div>
     </main>
   );
