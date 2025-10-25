@@ -12,35 +12,20 @@ const App: React.FC = () => {
   const [isContentVisible, setIsContentVisible] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNewQuoteAndImage = useCallback(async () => {
+  // Tìm nạp một câu trích dẫn mới và xử lý hoạt ảnh mờ dần cho văn bản
+  const fetchNewQuote = useCallback(async () => {
     setLoading(true);
-    setIsContentVisible(false); // Start fade-out
+    setIsContentVisible(false); // Bắt đầu mờ dần cho câu trích dẫn
 
     try {
       const newQuote = await generateQuote();
-      // Use Date.now() to ensure a new image is fetched each time
-      const newImageUrl = `https://picsum.photos/1920/1080?random=${Date.now()}`;
-      
-      // Preload image before setting state to ensure it's ready
-      const img = new Image();
-      img.src = newImageUrl;
-      img.onload = () => {
-          setTimeout(() => {
-              setQuote(newQuote);
-              setImageUrl(newImageUrl);
-              setError(null);
-              setLoading(false);
-              setIsContentVisible(true); // Start fade-in
-          }, 500); // Small delay to allow fade-out to complete
-      };
-      img.onerror = () => {
-          // Fallback if image fails to load
-          setQuote(newQuote);
-          setError("Không thể tải ảnh nền.");
-          setLoading(false);
-          setIsContentVisible(true);
-      };
-
+      // Chờ cho hiệu ứng mờ dần hoàn tất trước khi cập nhật nội dung và làm mờ dần
+      setTimeout(() => {
+        setQuote(newQuote);
+        setError(null);
+        setLoading(false);
+        setIsContentVisible(true); // Bắt đầu làm mờ dần
+      }, 500);
     } catch (err) {
       setError("Không thể lấy trích dẫn mới.");
       setLoading(false);
@@ -48,13 +33,35 @@ const App: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchNewQuoteAndImage(); // Initial fetch
-    const intervalId = setInterval(fetchNewQuoteAndImage, 10000); // Fetch every 10 seconds
-
-    return () => clearInterval(intervalId); // Cleanup on unmount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Tìm nạp một hình nền mới
+  const fetchNewImage = useCallback(() => {
+    const newImageUrl = `https://picsum.photos/1920/1080?random=${Date.now()}`;
+    const img = new Image();
+    img.src = newImageUrl;
+    img.onload = () => {
+      setImageUrl(newImageUrl);
+    };
+    img.onerror = () => {
+      // Không hiển thị lỗi cho nền, chỉ ghi lại nó. Ứng dụng có thể hoạt động mà không có nó.
+      console.error("Không thể tải ảnh nền.");
+    };
   }, []);
+
+  useEffect(() => {
+    // Tìm nạp ban đầu cho cả hai
+    fetchNewQuote();
+    fetchNewImage();
+
+    // Thiết lập các khoảng thời gian
+    const quoteIntervalId = setInterval(fetchNewQuote, 30000); // Tìm nạp câu trích dẫn sau mỗi 30 giây
+    const imageIntervalId = setInterval(fetchNewImage, 60000); // Tìm nạp hình ảnh sau mỗi 1 phút (60 * 1000 ms)
+
+    return () => {
+      clearInterval(quoteIntervalId);
+      clearInterval(imageIntervalId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Chỉ chạy một lần khi gắn kết
 
   return (
     <main 
