@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Trang chủ Động lực",
+  "description": "Hiển thị thời gian, thời tiết và những câu trích dẫn tạo động lực thay đổi ngẫu nhiên để truyền cảm hứng cho ngày của bạn.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
